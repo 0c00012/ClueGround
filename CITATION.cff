@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated manuscript."
+title: "ClueGround: Context-Guided YOLO-RAD-DINO Fusion"
+type: software
+authors:
+  - family-names: Kim
+    given-names: Siyoung
+  - family-names: Kim
+    given-names: Yoojoong
+version: 1.0.0
+date-released: 2026-09-07
+repository-code: "https://github.com/kimsi1854/ClueGround"
+license: MIT

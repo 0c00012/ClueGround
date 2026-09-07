@@ -1,0 +1,28 @@
+{
+  "status": "complete",
+  "method": "finding-conditioned YOLO-RAD-DINO + legacy semantic scorer without SigLIP",
+  "ablation_of": "1444 Hybrid+SigLIP MoE Coverage 0.5360",
+  "siglip_used": false,
+  "biomedclip_used": false,
+  "hybrid_unchanged": true,
+  "gate_architecture_unchanged": true,
+  "multi_cue_bypass_unchanged": true,
+  "set_params_unchanged": true,
+  "semantic_score_formula": "score_head_if_present_else_0 + 0.05*prior_iou + 0.03*confidence",
+  "selected_variants": [
+    "gate",
+    "gate",
+    "gate"
+  ],
+  "gold_mutation_independence_pass": true,
+  "coverage_mean_iou_mean": 0.5372594933248681,
+  "coverage_mean_iou_std": 0.0035023119154153444,
+  "exact_union_iou_mean": 0.5372609060996248,
+  "exact_union_iou_std": 0.0034646020706029434,
+  "set_f1_0_3_mean": 0.7726767676767676,
+  "set_f1_0_3_std": 0.01697127517913723,
+  "set_f1_0_5_mean": 0.6148484848484849,
+  "set_f1_0_5_std": 0.01485544054768933,
+  "mean_pred_count_mean": 1.234848484848485,
+  "mean_pred_count_std": 0.006943296507508857
+}

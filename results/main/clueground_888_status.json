@@ -1,0 +1,73 @@
+{
+  "status": "complete",
+  "method": "ClueGround YOLO-RAD-DINO + no-SigLIP semantic-score gate",
+  "protocol": "direct-888 train638/val87/eval163",
+  "siglip_used": false,
+  "biomedclip_used": false,
+  "score_formula": "score_head + 0.05*prior_iou + 0.03*confidence",
+  "set_params": {
+    "nms_iou": 0.35,
+    "score_ratio": 0.0,
+    "min_k_if_cue": 1,
+    "max_k_if_cue": 2
+  },
+  "selected_variants": [
+    "base",
+    "base",
+    "base"
+  ],
+  "gold_mutation_independence_pass": true,
+  "base_mean_iou_mean": 0.5486315252772557,
+  "base_mean_iou_std": 0.010677054233044237,
+  "base_hit_0_3_mean": 0.7730061349693251,
+  "base_hit_0_3_std": 0.018404907975460127,
+  "base_hit_0_5_mean": 0.6257668711656441,
+  "base_hit_0_5_std": 0.012269938650306733,
+  "no_siglip_mean_iou_mean": 0.5490723282323369,
+  "no_siglip_mean_iou_std": 0.0170127606607116,
+  "no_siglip_hit_0_3_mean": 0.7627811860940694,
+  "no_siglip_hit_0_3_std": 0.03378877636371839,
+  "no_siglip_hit_0_5_mean": 0.6278118609406953,
+  "no_siglip_hit_0_5_std": 0.007084052382694817,
+  "selected_mean_iou_mean": 0.5486315252772557,
+  "selected_mean_iou_std": 0.010677054233044237,
+  "selected_hit_0_3_mean": 0.7730061349693251,
+  "selected_hit_0_3_std": 0.018404907975460127,
+  "selected_hit_0_5_mean": 0.6257668711656441,
+  "selected_hit_0_5_std": 0.012269938650306733,
+  "delta_no_siglip_vs_base_mean_iou": 0.0004408029550811987,
+  "delta_selected_vs_base_mean_iou": 0.0,
+  "split_overlap_audit": {
+    "seed_13": {
+      "counts": {
+        "train": 638,
+        "val": 87,
+        "eval": 163
+      },
+      "train_val_subject_overlap": 0,
+      "train_eval_subject_overlap": 0,
+      "val_eval_subject_overlap": 0
+    },
+    "seed_42": {
+      "counts": {
+        "train": 638,
+        "val": 87,
+        "eval": 163
+      },
+      "train_val_subject_overlap": 0,
+      "train_eval_subject_overlap": 0,
+      "val_eval_subject_overlap": 0
+    },
+    "seed_2026": {
+      "counts": {
+        "train": 638,
+        "val": 87,
+        "eval": 163
+      },
+      "train_val_subject_overlap": 0,
+      "train_eval_subject_overlap": 0,
+      "val_eval_subject_overlap": 0
+    },
+    "status": "PASS"
+  }
+}
