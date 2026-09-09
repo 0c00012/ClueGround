@@ -1,0 +1,995 @@
+{
+  "strict": {
+    "mapping": "strict",
+    "root": "C:\\Users\\_idal\\Documents\\MIMIC-CXR\\mimic_cxr_yovis_project\\experiments\\padchest_gr_external_v1\\results_strict",
+    "seeds": [
+      13,
+      42,
+      2026
+    ],
+    "aggregate": {
+      "clueground_reranker": {
+        "coverage_iou": {
+          "mean": 0.5356339263033476,
+          "std": 0.0056327138508097
+        },
+        "exact_union_iou": {
+          "mean": 0.5385163634430126,
+          "std": 0.0053877228911994
+        },
+        "set_f1_optimal_0_3": {
+          "mean": 0.7734822451317296,
+          "std": 0.0116640388627814
+        },
+        "set_f1_optimal_0_5": {
+          "mean": 0.6380297823596793,
+          "std": 0.0225723326448323
+        }
+      },
+      "hybrid_no_reranker": {
+        "coverage_iou": {
+          "mean": 0.4894650715614095,
+          "std": 0.013913583717975
+        },
+        "exact_union_iou": {
+          "mean": 0.4909984767279144,
+          "std": 0.0145144241044382
+        },
+        "set_f1_optimal_0_3": {
+          "mean": 0.7001718213058418,
+          "std": 0.0381795292840017
+        },
+        "set_f1_optimal_0_5": {
+          "mean": 0.5827605956471936,
+          "std": 0.0168860515324233
+        }
+      },
+      "rad_dino_only": {
+        "coverage_iou": {
+          "mean": 0.4418600834703656,
+          "std": 0.0166958765034643
+        },
+        "exact_union_iou": {
+          "mean": 0.4532065176918752,
+          "std": 0.0161222956321582
+        },
+        "set_f1_optimal_0_3": {
+          "mean": 0.6849942726231387,
+          "std": 0.0307523339259079
+        },
+        "set_f1_optimal_0_5": {
+          "mean": 0.4862542955326461,
+          "std": 0.0393692070013388
+        }
+      }
+    },
+    "per_finding": {
+      "Atelectasis": {
+        "n": 46,
+        "coverage_iou": 0.2524994001522665,
+        "exact_union_iou": 0.2545051355908849,
+        "set_f1_optimal_0_3": 0.4033816425120773,
+        "set_f1_optimal_0_5": 0.1666666666666666
+      },
+      "Cardiomegaly": {
+        "n": 99,
+        "coverage_iou": 0.7322174604684378,
+        "exact_union_iou": 0.7330063257309597,
+        "set_f1_optimal_0_3": 0.98989898989899,
+        "set_f1_optimal_0_5": 0.9528619528619529
+      },
+      "Consolidation": {
+        "n": 4,
+        "coverage_iou": 0.1826931967647732,
+        "exact_union_iou": 0.1826931967647732,
+        "set_f1_optimal_0_3": 0.25,
+        "set_f1_optimal_0_5": 0.0833333333333333
+      },
+      "Pleural Effusion": {
+        "n": 41,
+        "coverage_iou": 0.4215219158965584,
+        "exact_union_iou": 0.4277989317623901,
+        "set_f1_optimal_0_3": 0.7357723577235772,
+        "set_f1_optimal_0_5": 0.4661246612466124
+      },
+      "Pneumothorax": {
+        "n": 4,
+        "coverage_iou": 0.4488273426629603,
+        "exact_union_iou": 0.4816957585204088,
+        "set_f1_optimal_0_3": 0.5833333333333334,
+        "set_f1_optimal_0_5": 0.5833333333333334
+      }
+    },
+    "per_reference_count": {
+      "multi (2+ boxes)": {
+        "n": 19,
+        "coverage_iou": 0.3362649367586571,
+        "exact_union_iou": 0.3656961370268152,
+        "set_f1_optimal_0_3": 0.5643274853801169,
+        "set_f1_optimal_0_5": 0.3391812865497075
+      },
+      "single (1 box)": {
+        "n": 175,
+        "coverage_iou": 0.5572797023110568,
+        "exact_union_iou": 0.5572797023110568,
+        "set_f1_optimal_0_3": 0.7961904761904762,
+        "set_f1_optimal_0_5": 0.6704761904761906
+      }
+    },
+    "paired": {
+      "clueground_reranker_minus_hybrid_no_reranker": {
+        "13": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.047716059876716066,
+            "ci_95_low": 0.02472531784469701,
+            "ci_95_high": 0.07270406408693618,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.04797865821344045,
+            "ci_95_low": 0.02509800265364611,
+            "ci_95_high": 0.07312762263173625,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.05670103092783505,
+            "ci_95_low": 0.017587939698492462,
+            "ci_95_high": 0.09803921568627451,
+            "p_bootstrap_two_sided": 0.005
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.06872852233676977,
+            "ci_95_low": 0.025305410122164054,
+            "ci_95_high": 0.11168115533321886,
+            "p_bootstrap_two_sided": 0.001
+          }
+        ],
+        "42": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.029150412322067786,
+            "ci_95_low": 0.008200149695788118,
+            "ci_95_high": 0.053169192335324876,
+            "p_bootstrap_two_sided": 0.004
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.031445757600390714,
+            "ci_95_low": 0.01002948764083049,
+            "ci_95_high": 0.05552401945893166,
+            "p_bootstrap_two_sided": 0.002
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.053264604810996555,
+            "ci_95_low": 0.007089413686829305,
+            "ci_95_high": 0.0979381443298969,
+            "p_bootstrap_two_sided": 0.02
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.03608247422680413,
+            "ci_95_low": 0.003364527629233512,
+            "ci_95_high": 0.07041340105065592,
+            "p_bootstrap_two_sided": 0.027
+          }
+        ],
+        "2026": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.061640092027030594,
+            "ci_95_low": 0.0390337997074854,
+            "ci_95_high": 0.08671063295457059,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.06312924433146322,
+            "ci_95_low": 0.04052941121162495,
+            "ci_95_high": 0.0881641879986406,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.10996563573883163,
+            "ci_95_low": 0.06464554718653079,
+            "ci_95_high": 0.16083405887230515,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.06099656357388317,
+            "ci_95_low": 0.028347219949453627,
+            "ci_95_high": 0.09964749359079257,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ]
+      },
+      "clueground_reranker_minus_rad_dino_only": {
+        "13": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.11866707438116147,
+            "ci_95_low": 0.08900774940825816,
+            "ci_95_high": 0.1481566074212179,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.10966318503081518,
+            "ci_95_low": 0.08075875915782538,
+            "ci_95_high": 0.1385352663537816,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.13573883161512026,
+            "ci_95_low": 0.07529542601386387,
+            "ci_95_high": 0.19584341397849458,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.22079037800687282,
+            "ci_95_low": 0.15110524334617598,
+            "ci_95_high": 0.2938183183961042,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ],
+        "42": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.07754121967076652,
+            "ci_95_low": 0.046916697024028155,
+            "ci_95_high": 0.1073823262951922,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.07059442916813634,
+            "ci_95_low": 0.04043186568712521,
+            "ci_95_high": 0.09992067510141385,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.054982817869415807,
+            "ci_95_low": 0.0034844421742646742,
+            "ci_95_high": 0.10935007502171679,
+            "p_bootstrap_two_sided": 0.038
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.13058419243986252,
+            "ci_95_low": 0.05554897314375987,
+            "ci_95_high": 0.19643238705738703,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ],
+        "2026": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.08511323444701797,
+            "ci_95_low": 0.0584007259420528,
+            "ci_95_high": 0.11427909317759367,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.07567192305446072,
+            "ci_95_low": 0.04872636796509319,
+            "ci_95_high": 0.10450168435367281,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.07474226804123711,
+            "ci_95_low": 0.018312872023809525,
+            "ci_95_high": 0.12894884446693655,
+            "p_bootstrap_two_sided": 0.01
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.10395189003436425,
+            "ci_95_low": 0.043139956490210296,
+            "ci_95_high": 0.1701624006205158,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ]
+      }
+    },
+    "ci": {
+      "13": {
+        "clueground_reranker:coverage_iou": {
+          "point": 0.5412825983145195,
+          "low": 0.5057685217676547,
+          "high": 0.5786761494346135
+        },
+        "clueground_reranker:exact_union_iou": {
+          "point": 0.5442612304922534,
+          "low": 0.5080027352350206,
+          "high": 0.5815218125741806
+        },
+        "clueground_reranker:set_f1_optimal_0_3": {
+          "point": 0.7869415807560138,
+          "low": 0.7314303786741562,
+          "high": 0.8420185062056736
+        },
+        "clueground_reranker:set_f1_optimal_0_5": {
+          "point": 0.6640893470790379,
+          "low": 0.6009153405918481,
+          "high": 0.728950179937022
+        },
+        "hybrid_no_reranker:coverage_iou": {
+          "point": 0.4935665384378034,
+          "low": 0.4492896583405544,
+          "high": 0.5364572347868989
+        },
+        "hybrid_no_reranker:exact_union_iou": {
+          "point": 0.4962825722788128,
+          "low": 0.4524465621690277,
+          "high": 0.5394077535100442
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_3": {
+          "point": 0.7302405498281787,
+          "low": 0.6666666666666666,
+          "high": 0.7914532019704432
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_5": {
+          "point": 0.595360824742268,
+          "low": 0.5251256281407035,
+          "high": 0.6641166076983557
+        },
+        "rad_dino_only:coverage_iou": {
+          "point": 0.4226155239333581,
+          "low": 0.3910838903795652,
+          "high": 0.4567885215330092
+        },
+        "rad_dino_only:exact_union_iou": {
+          "point": 0.4345980454614381,
+          "low": 0.4031949860610938,
+          "high": 0.4675275232488335
+        },
+        "rad_dino_only:set_f1_optimal_0_3": {
+          "point": 0.6512027491408935,
+          "low": 0.5865316164154104,
+          "high": 0.7200081300813007
+        },
+        "rad_dino_only:set_f1_optimal_0_5": {
+          "point": 0.4432989690721649,
+          "low": 0.3729598731384446,
+          "high": 0.5159617364447494
+        }
+      },
+      "42": {
+        "clueground_reranker:coverage_iou": {
+          "point": 0.530017307413139,
+          "low": 0.4924162615834944,
+          "high": 0.5698176871106689
+        },
+        "clueground_reranker:exact_union_iou": {
+          "point": 0.5335763383503436,
+          "low": 0.4961916130078666,
+          "high": 0.5726374069429839
+        },
+        "clueground_reranker:set_f1_optimal_0_3": {
+          "point": 0.7663230240549828,
+          "low": 0.70622787149849,
+          "high": 0.8241800887021474
+        },
+        "clueground_reranker:set_f1_optimal_0_5": {
+          "point": 0.6254295532646048,
+          "low": 0.5613068433569343,
+          "high": 0.6934433786117722
+        },
+        "hybrid_no_reranker:coverage_iou": {
+          "point": 0.5008668950910712,
+          "low": 0.4601096399693353,
+          "high": 0.5447045863363275
+        },
+        "hybrid_no_reranker:exact_union_iou": {
+          "point": 0.5021305807499528,
+          "low": 0.4612586822955568,
+          "high": 0.5456370045427004
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_3": {
+          "point": 0.7130584192439862,
+          "low": 0.6496715794214792,
+          "high": 0.777482269503546
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_5": {
+          "point": 0.5893470790378007,
+          "low": 0.52515644259031,
+          "high": 0.6595214478753376
+        },
+        "rad_dino_only:coverage_iou": {
+          "point": 0.4524760877423724,
+          "low": 0.4189768785510944,
+          "high": 0.4873234915810813
+        },
+        "rad_dino_only:exact_union_iou": {
+          "point": 0.4629819091822072,
+          "low": 0.4303809582036605,
+          "high": 0.4974588473358663
+        },
+        "rad_dino_only:set_f1_optimal_0_3": {
+          "point": 0.711340206185567,
+          "low": 0.6412660235114855,
+          "high": 0.7777777777777778
+        },
+        "rad_dino_only:set_f1_optimal_0_5": {
+          "point": 0.4948453608247423,
+          "low": 0.4175234086824931,
+          "high": 0.5706993268511592
+        }
+      },
+      "2026": {
+        "clueground_reranker:coverage_iou": {
+          "point": 0.5356018731823844,
+          "low": 0.4931920159196851,
+          "high": 0.5769291176840522
+        },
+        "clueground_reranker:exact_union_iou": {
+          "point": 0.537711521486441,
+          "low": 0.4957223743177672,
+          "high": 0.5783443350219627
+        },
+        "clueground_reranker:set_f1_optimal_0_3": {
+          "point": 0.7671821305841924,
+          "low": 0.7081252419667053,
+          "high": 0.8219298245614035
+        },
+        "clueground_reranker:set_f1_optimal_0_5": {
+          "point": 0.6245704467353952,
+          "low": 0.5547616172072695,
+          "high": 0.6935867059426228
+        },
+        "hybrid_no_reranker:coverage_iou": {
+          "point": 0.4739617811553538,
+          "low": 0.4259407819331493,
+          "high": 0.5229797848829836
+        },
+        "hybrid_no_reranker:exact_union_iou": {
+          "point": 0.4745822771549778,
+          "low": 0.4266570387821728,
+          "high": 0.5233317741941184
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_3": {
+          "point": 0.6572164948453607,
+          "low": 0.5915829827801433,
+          "high": 0.7244906770998555
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_5": {
+          "point": 0.563573883161512,
+          "low": 0.4928615611780668,
+          "high": 0.6329823937771829
+        },
+        "rad_dino_only:coverage_iou": {
+          "point": 0.4504886387353664,
+          "low": 0.4146650886243909,
+          "high": 0.4874202220596741
+        },
+        "rad_dino_only:exact_union_iou": {
+          "point": 0.4620395984319801,
+          "low": 0.4268124933228868,
+          "high": 0.4966934779802492
+        },
+        "rad_dino_only:set_f1_optimal_0_3": {
+          "point": 0.6924398625429554,
+          "low": 0.6281309253543522,
+          "high": 0.7559372018388409
+        },
+        "rad_dino_only:set_f1_optimal_0_5": {
+          "point": 0.520618556701031,
+          "low": 0.454080943188086,
+          "high": 0.5879278273809523
+        }
+      }
+    },
+    "n_rows": 194
+  },
+  "extended": {
+    "mapping": "extended",
+    "root": "C:\\Users\\_idal\\Documents\\MIMIC-CXR\\mimic_cxr_yovis_project\\experiments\\pgx_ext",
+    "seeds": [
+      13,
+      42,
+      2026
+    ],
+    "aggregate": {
+      "clueground_reranker": {
+        "coverage_iou": {
+          "mean": 0.4680369002695717,
+          "std": 0.0031138855909393
+        },
+        "exact_union_iou": {
+          "mean": 0.470073145201465,
+          "std": 0.0039272899181001
+        },
+        "set_f1_optimal_0_3": {
+          "mean": 0.6985611510791366,
+          "std": 0.0125613470262331
+        },
+        "set_f1_optimal_0_5": {
+          "mean": 0.5145483613109512,
+          "std": 0.0069465072357999
+        }
+      },
+      "hybrid_no_reranker": {
+        "coverage_iou": {
+          "mean": 0.4299210094829761,
+          "std": 0.0185032971505946
+        },
+        "exact_union_iou": {
+          "mean": 0.4300829591619869,
+          "std": 0.0184264345258519
+        },
+        "set_f1_optimal_0_3": {
+          "mean": 0.6254596322941647,
+          "std": 0.0305485688477958
+        },
+        "set_f1_optimal_0_5": {
+          "mean": 0.4681854516386889,
+          "std": 0.0275352430782885
+        }
+      },
+      "rad_dino_only": {
+        "coverage_iou": {
+          "mean": 0.3853461050995732,
+          "std": 0.0161171402091432
+        },
+        "exact_union_iou": {
+          "mean": 0.4050991568516981,
+          "std": 0.0152069907244505
+        },
+        "set_f1_optimal_0_3": {
+          "mean": 0.5943245403677059,
+          "std": 0.025606843687489
+        },
+        "set_f1_optimal_0_5": {
+          "mean": 0.3772981614708233,
+          "std": 0.0380935333571346
+        }
+      }
+    },
+    "per_finding": {
+      "Atelectasis": {
+        "n": 45,
+        "coverage_iou": 0.2581109221321551,
+        "exact_union_iou": 0.2601612294694094,
+        "set_f1_optimal_0_3": 0.4123456790123456,
+        "set_f1_optimal_0_5": 0.1703703703703703
+      },
+      "Cardiomegaly": {
+        "n": 99,
+        "coverage_iou": 0.7322174923579482,
+        "exact_union_iou": 0.7330063576204701,
+        "set_f1_optimal_0_3": 0.98989898989899,
+        "set_f1_optimal_0_5": 0.9528619528619529
+      },
+      "Consolidation": {
+        "n": 4,
+        "coverage_iou": 0.1826931967647732,
+        "exact_union_iou": 0.1826931967647732,
+        "set_f1_optimal_0_3": 0.25,
+        "set_f1_optimal_0_5": 0.0833333333333333
+      },
+      "Lung Opacity": {
+        "n": 85,
+        "coverage_iou": 0.3082500508951441,
+        "exact_union_iou": 0.3083310307301008,
+        "set_f1_optimal_0_3": 0.5193464052287581,
+        "set_f1_optimal_0_5": 0.2266666666666666
+      },
+      "Pleural Effusion": {
+        "n": 41,
+        "coverage_iou": 0.4215219158965584,
+        "exact_union_iou": 0.4277989317623901,
+        "set_f1_optimal_0_3": 0.7357723577235772,
+        "set_f1_optimal_0_5": 0.4661246612466124
+      },
+      "Pneumothorax": {
+        "n": 4,
+        "coverage_iou": 0.4488273426629603,
+        "exact_union_iou": 0.4816957585204088,
+        "set_f1_optimal_0_3": 0.5833333333333334,
+        "set_f1_optimal_0_5": 0.5833333333333334
+      }
+    },
+    "per_reference_count": {
+      "multi (2+ boxes)": {
+        "n": 43,
+        "coverage_iou": 0.3163779330059086,
+        "exact_union_iou": 0.3404332097923694,
+        "set_f1_optimal_0_3": 0.5317829457364341,
+        "set_f1_optimal_0_5": 0.2904392764857881
+      },
+      "single (1 box)": {
+        "n": 235,
+        "coverage_iou": 0.4957872644922845,
+        "exact_union_iou": 0.4937944950848314,
+        "set_f1_optimal_0_3": 0.7290780141843971,
+        "set_f1_optimal_0_5": 0.5555555555555557
+      }
+    },
+    "paired": {
+      "clueground_reranker_minus_hybrid_no_reranker": {
+        "13": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.048493325169896115,
+            "ci_95_low": 0.028834140389726,
+            "ci_95_high": 0.07094708026624999,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.04895646817239904,
+            "ci_95_low": 0.029531408226020368,
+            "ci_95_high": 0.07112930289551977,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.08812949640287769,
+            "ci_95_low": 0.049268333468006215,
+            "ci_95_high": 0.13051760400105988,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.06918465227817747,
+            "ci_95_low": 0.03247897397384209,
+            "ci_95_high": 0.11055415759479362,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ],
+        "42": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.019477065114484802,
+            "ci_95_low": 0.0014443685151928683,
+            "ci_95_high": 0.03758906652757207,
+            "p_bootstrap_two_sided": 0.036
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.022817043768271136,
+            "ci_95_low": 0.004999743810416396,
+            "ci_95_high": 0.040417043999410394,
+            "p_bootstrap_two_sided": 0.005
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.049160671462829736,
+            "ci_95_low": 0.00993898491616495,
+            "ci_95_high": 0.08604658183759595,
+            "p_bootstrap_two_sided": 0.017
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.019784172661870502,
+            "ci_95_low": -0.0119047619047619,
+            "ci_95_high": 0.05253861556064072,
+            "p_bootstrap_two_sided": 0.245
+          }
+        ],
+        "2026": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.04637728207540595,
+            "ci_95_low": 0.027893634781213268,
+            "ci_95_high": 0.06549774064831167,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.04819704617776384,
+            "ci_95_low": 0.02958109639499641,
+            "ci_95_high": 0.06773825843569892,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.08201438848920863,
+            "ci_95_low": 0.04473048327137547,
+            "ci_95_high": 0.12120141342756183,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.05011990407673861,
+            "ci_95_low": 0.018314844877344878,
+            "ci_95_high": 0.08282531571950814,
+            "p_bootstrap_two_sided": 0.001
+          }
+        ]
+      },
+      "clueground_reranker_minus_rad_dino_only": {
+        "13": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.10180072561395814,
+            "ci_95_low": 0.07724021389521127,
+            "ci_95_high": 0.12754663707961106,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.08218099605708042,
+            "ci_95_low": 0.05867089637752837,
+            "ci_95_high": 0.10680482272488699,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.13621103117505995,
+            "ci_95_low": 0.08124138406396471,
+            "ci_95_high": 0.1918826760249554,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.18429256594724222,
+            "ci_95_low": 0.12733969330789344,
+            "ci_95_high": 0.24479292019571017,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ],
+        "42": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.07375329945400622,
+            "ci_95_low": 0.04882769080781261,
+            "ci_95_high": 0.09868079722073318,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.058582994915659194,
+            "ci_95_low": 0.03476147688881739,
+            "ci_95_high": 0.08324302370132054,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.09544364508393285,
+            "ci_95_low": 0.044982951037012824,
+            "ci_95_high": 0.14743022533318112,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.12134292565947243,
+            "ci_95_low": 0.058096744044513995,
+            "ci_95_high": 0.18140993152227777,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ],
+        "2026": [
+          {
+            "metric": "coverage_iou",
+            "mean_difference": 0.07251836044203142,
+            "ci_95_low": 0.0493974594321473,
+            "ci_95_high": 0.09515427537903573,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "exact_union_iou",
+            "mean_difference": 0.05415797407656083,
+            "ci_95_low": 0.031586736162963994,
+            "ci_95_high": 0.0762270365896604,
+            "p_bootstrap_two_sided": 0.0
+          },
+          {
+            "metric": "set_f1_optimal_0_3",
+            "mean_difference": 0.08105515587529975,
+            "ci_95_low": 0.02831449126413155,
+            "ci_95_high": 0.1334556893331314,
+            "p_bootstrap_two_sided": 0.004
+          },
+          {
+            "metric": "set_f1_optimal_0_5",
+            "mean_difference": 0.10611510791366907,
+            "ci_95_low": 0.05242190468436194,
+            "ci_95_high": 0.15745082862866502,
+            "p_bootstrap_two_sided": 0.0
+          }
+        ]
+      }
+    },
+    "ci": {
+      "13": {
+        "clueground_reranker:coverage_iou": {
+          "point": 0.4687499093738435,
+          "low": 0.4365042076387524,
+          "high": 0.4990125194811984
+        },
+        "clueground_reranker:exact_union_iou": {
+          "point": 0.4698319002961711,
+          "low": 0.4379968885808459,
+          "high": 0.4998788813098298
+        },
+        "clueground_reranker:set_f1_optimal_0_3": {
+          "point": 0.701558752997602,
+          "low": 0.6480814790546744,
+          "high": 0.7501364951097329
+        },
+        "clueground_reranker:set_f1_optimal_0_5": {
+          "point": 0.5176258992805756,
+          "low": 0.4587175563463819,
+          "high": 0.5775406403940886
+        },
+        "hybrid_no_reranker:coverage_iou": {
+          "point": 0.4202565842039473,
+          "low": 0.3868264991556067,
+          "high": 0.452868874377196
+        },
+        "hybrid_no_reranker:exact_union_iou": {
+          "point": 0.4208754321237721,
+          "low": 0.3872643265353821,
+          "high": 0.4539996400768356
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_3": {
+          "point": 0.6134292565947242,
+          "low": 0.5609171075837742,
+          "high": 0.6626979945255165
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_5": {
+          "point": 0.448441247002398,
+          "low": 0.3928979942425363,
+          "high": 0.5057198695807814
+        },
+        "rad_dino_only:coverage_iou": {
+          "point": 0.3669491837598853,
+          "low": 0.3396834550102022,
+          "high": 0.3961298738101824
+        },
+        "rad_dino_only:exact_union_iou": {
+          "point": 0.3876509042390907,
+          "low": 0.3614418419535526,
+          "high": 0.4146149753468225
+        },
+        "rad_dino_only:set_f1_optimal_0_3": {
+          "point": 0.5653477218225419,
+          "low": 0.5059873691955526,
+          "high": 0.6271224961479198
+        },
+        "rad_dino_only:set_f1_optimal_0_5": {
+          "point": 0.3333333333333333,
+          "low": 0.279210557676511,
+          "high": 0.391145187866973
+        }
+      },
+      "42": {
+        "clueground_reranker:coverage_iou": {
+          "point": 0.4707324437161375,
+          "low": 0.4387050393478395,
+          "high": 0.5040975603792786
+        },
+        "clueground_reranker:exact_union_iou": {
+          "point": 0.4741154964530682,
+          "low": 0.4429485950023255,
+          "high": 0.5073722623082805
+        },
+        "clueground_reranker:set_f1_optimal_0_3": {
+          "point": 0.7093525179856115,
+          "low": 0.6586113127646702,
+          "high": 0.7580957995267071
+        },
+        "clueground_reranker:set_f1_optimal_0_5": {
+          "point": 0.5194244604316546,
+          "low": 0.4614862389598625,
+          "high": 0.5801783008658008
+        },
+        "hybrid_no_reranker:coverage_iou": {
+          "point": 0.4512553786016526,
+          "low": 0.418313968729225,
+          "high": 0.486122852067798
+        },
+        "hybrid_no_reranker:exact_union_iou": {
+          "point": 0.451298452684797,
+          "low": 0.4175066567658606,
+          "high": 0.4857070206563611
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_3": {
+          "point": 0.6601918465227817,
+          "low": 0.6059377915849138,
+          "high": 0.7133625954198474
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_5": {
+          "point": 0.4996402877697841,
+          "low": 0.4450533010756659,
+          "high": 0.5584072383633741
+        },
+        "rad_dino_only:coverage_iou": {
+          "point": 0.3969791442621312,
+          "low": 0.3692850953044663,
+          "high": 0.4263196703682951
+        },
+        "rad_dino_only:exact_union_iou": {
+          "point": 0.415532501537409,
+          "low": 0.3880937199037657,
+          "high": 0.443265172056145
+        },
+        "rad_dino_only:set_f1_optimal_0_3": {
+          "point": 0.6139088729016786,
+          "low": 0.5600978797652891,
+          "high": 0.6750957124392745
+        },
+        "rad_dino_only:set_f1_optimal_0_5": {
+          "point": 0.3980815347721823,
+          "low": 0.338181379007466,
+          "high": 0.4624130288407586
+        }
+      },
+      "2026": {
+        "clueground_reranker:coverage_iou": {
+          "point": 0.4646283477187342,
+          "low": 0.4331324573925248,
+          "high": 0.4964965525072862
+        },
+        "clueground_reranker:exact_union_iou": {
+          "point": 0.4662720388551555,
+          "low": 0.4352657926639311,
+          "high": 0.4983273670778232
+        },
+        "clueground_reranker:set_f1_optimal_0_3": {
+          "point": 0.6847721822541967,
+          "low": 0.6374238543597749,
+          "high": 0.7339483964284087
+        },
+        "clueground_reranker:set_f1_optimal_0_5": {
+          "point": 0.5065947242206235,
+          "low": 0.4496362143734489,
+          "high": 0.5636390800434624
+        },
+        "hybrid_no_reranker:coverage_iou": {
+          "point": 0.4182510656433282,
+          "low": 0.3826459934760201,
+          "high": 0.4554222820154984
+        },
+        "hybrid_no_reranker:exact_union_iou": {
+          "point": 0.4180749926773916,
+          "low": 0.3824143167234681,
+          "high": 0.4553003417194686
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_3": {
+          "point": 0.602757793764988,
+          "low": 0.5504528109594237,
+          "high": 0.6574853191741379
+        },
+        "hybrid_no_reranker:set_f1_optimal_0_5": {
+          "point": 0.4564748201438848,
+          "low": 0.3991399622792379,
+          "high": 0.5179518072289157
+        },
+        "rad_dino_only:coverage_iou": {
+          "point": 0.3921099872767028,
+          "low": 0.3621960273839127,
+          "high": 0.4235448909970714
+        },
+        "rad_dino_only:exact_union_iou": {
+          "point": 0.4121140647785946,
+          "low": 0.3833060683210456,
+          "high": 0.4430480526645047
+        },
+        "rad_dino_only:set_f1_optimal_0_3": {
+          "point": 0.6037170263788968,
+          "low": 0.5466637931034484,
+          "high": 0.6624067164179104
+        },
+        "rad_dino_only:set_f1_optimal_0_5": {
+          "point": 0.4004796163069544,
+          "low": 0.3426557239057239,
+          "high": 0.4642890583199572
+        }
+      }
+    },
+    "n_rows": 278
+  }
+}

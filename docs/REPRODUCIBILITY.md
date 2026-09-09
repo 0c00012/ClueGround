@@ -54,6 +54,17 @@ python scripts/compile_reranker_paper_numbers_v1.py
 python scripts/compile_reranker_per_finding_v1.py
 ```
 
+External zero-shot evaluation on PadChest-GR (Supplementary Tables S8 and S9; sealed assets applied unchanged, no training or tuning):
+
+```bash
+python scripts/build_padchest_gr_protocol_v1.py --dataset-root /path/to/PadChest-GR --out-root work --mapping both
+python scripts/run_clueground_padchest_gr_zero_shot_v1.py --protocol-root work/protocol_strict --out-root work/results_strict --assets /path/to/sealed_assets
+python scripts/run_clueground_padchest_gr_zero_shot_v1.py --protocol-root work/protocol_extended --out-root work/results_extended --assets /path/to/sealed_assets
+python scripts/compile_padchest_external_v1.py --strict-root work/results_strict --extended-root work/results_extended
+```
+
+The sealed per-seed assets (YOLO weights, RAD-DINO head, calibration, re-ranker training table, spatial-prior rows derived from MS-CXR annotations) are not distributed; `padchest/export_assets.py` in the research tree documents their layout. The zero-shot runner refits the scorer from the sealed training table and stops unless it reproduces the sealed MS-CXR evaluation scores exactly (scikit-learn 1.6.1).
+
 End-to-end context comparison (unchanged from the submitted manuscript):
 
 ```bash

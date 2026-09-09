@@ -1,0 +1,51 @@
+{
+  "dataset": "PadChest-GR (grounded_reports_20240819.json)",
+  "split": "test",
+  "label_mapping": "extended",
+  "n_rows": 278,
+  "n_images": 220,
+  "n_patients": 214,
+  "rows_per_finding": {
+    "Atelectasis": 45,
+    "Cardiomegaly": 99,
+    "Consolidation": 4,
+    "Lung Opacity": 85,
+    "Pleural Effusion": 41,
+    "Pneumothorax": 4
+  },
+  "rows_per_gold_count": {
+    "1": 235,
+    "2": 41,
+    "3": 2
+  },
+  "skipped": {
+    "label_not_in_mapping": 957,
+    "no_boxes": 874,
+    "ambiguous_multi_finding_sentence": 3
+  },
+  "image_conversion": "16-bit PNG -> per-image min-max scaled 8-bit RGB JPEG (quality 95)",
+  "box_convention": "PadChest-GR normalized [x1, y1, x2, y2] scaled to pixels of the converted image",
+  "mapping": {
+    "cardiomegaly": "Cardiomegaly",
+    "pleural effusion": "Pleural Effusion",
+    "loculated pleural effusion": "Pleural Effusion",
+    "loculated fissural effusion": "Pleural Effusion",
+    "atelectasis": "Atelectasis",
+    "laminar atelectasis": "Atelectasis",
+    "lobar atelectasis": "Atelectasis",
+    "atelectasis basal": "Atelectasis",
+    "segmental atelectasis": "Atelectasis",
+    "total atelectasis": "Atelectasis",
+    "round atelectasis": "Atelectasis",
+    "consolidation": "Consolidation",
+    "pneumothorax": "Pneumothorax",
+    "hydropneumothorax": "Pneumothorax",
+    "pneumonia": "Pneumonia",
+    "atypical pneumonia": "Pneumonia",
+    "pulmonary edema": "Edema",
+    "alveolar pattern": "Lung Opacity",
+    "infiltrates": "Lung Opacity",
+    "increased density": "Lung Opacity",
+    "miliary opacities": "Lung Opacity"
+  }
+}

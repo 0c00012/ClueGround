@@ -1,0 +1,28 @@
+{
+  "_comment": "PadChest-GR label -> MS-CXR finding class. 'strict' keeps only labels that name the same finding; 'extended_extra' additionally maps opacity-type labels to Lung Opacity and is reported separately.",
+  "strict": {
+    "cardiomegaly": "Cardiomegaly",
+    "pleural effusion": "Pleural Effusion",
+    "loculated pleural effusion": "Pleural Effusion",
+    "loculated fissural effusion": "Pleural Effusion",
+    "atelectasis": "Atelectasis",
+    "laminar atelectasis": "Atelectasis",
+    "lobar atelectasis": "Atelectasis",
+    "atelectasis basal": "Atelectasis",
+    "segmental atelectasis": "Atelectasis",
+    "total atelectasis": "Atelectasis",
+    "round atelectasis": "Atelectasis",
+    "consolidation": "Consolidation",
+    "pneumothorax": "Pneumothorax",
+    "hydropneumothorax": "Pneumothorax",
+    "pneumonia": "Pneumonia",
+    "atypical pneumonia": "Pneumonia",
+    "pulmonary edema": "Edema"
+  },
+  "extended_extra": {
+    "alveolar pattern": "Lung Opacity",
+    "infiltrates": "Lung Opacity",
+    "increased density": "Lung Opacity",
+    "miliary opacities": "Lung Opacity"
+  }
+}
