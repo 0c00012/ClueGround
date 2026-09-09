@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SPLITS = ("train", "val", "eval")
 
 OutputMode = Literal["variable_set", "one_box"]
@@ -50,9 +50,13 @@ PROTOCOLS: dict[str, ProtocolSpec] = {
         target_semantics="MS-CXR phrase-grounding rectangles",
         output_mode="variable_set",
         expected_source_rows={"train": 998, "val": 166, "eval": 280},
+        # Canonical finding-conditioned membership used by controlled 1444 runs.
         expected_groups={"train": 813, "val": 124, "eval": 220},
         primary_metrics=("coverage_mean_iou", "exact_union_iou", "set_f1_0_3", "set_f1_0_5"),
-        query_contract="raw localized phrase only; dataset finding/category is not an inference input",
+        query_contract=(
+            "MS-CXR finding query plus raw localized phrase; finding specifies what pathology to localize "
+            "and is supplied identically across train/val/eval"
+        ),
         task_supervision_note="MS-CXR train localization supervision only in the task-isolated main arm",
     ),
     "imagenome_anatomy_10k": ProtocolSpec(

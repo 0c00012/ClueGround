@@ -28,6 +28,7 @@ The historical 1444 result is reproducible from the archived local artifact chai
 - End-to-end context comparison (Table 5): `results/ablations/context_aggregate.csv` (unchanged)
 - Paired differences vs MedGrounder (Supplementary Table S4): `results/comparison/paired_difference_ci_1444.csv`
 - Re-ranker robustness (Supplementary Table S5): `results/robustness/*.csv`
+- Per-finding and per-reference-count breakdown (Supplementary Tables S6 and S7): `results/per_finding/*.csv`, regrouped from the sealed row-level scoring by `scripts/compile_reranker_per_finding_v1.py` (no new inference)
 - Direct-888 paired comparisons vs MedRPG / TransVG (text): `results/comparison/paired_difference_ci_888.csv`
 
 The current submitted PDF was checked separately from the older handoff PDF. Their SHA-256 values differ, so the current PDF, not the handoff copy, is the manuscript source of truth for table numbering and wording.

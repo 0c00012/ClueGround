@@ -6,9 +6,63 @@ from typing import Any
 import pandas as pd
 from pandas.util import hash_pandas_object
 
-from .box_features import iou_xyxy
-from .cue_aware_set_selector import candidate_laterality, target_match_score
 from .multibox_cue_parser import SIDE_CUE_TYPES, norm_text
+
+
+# Kept local so this curated paper-method snapshot has no legacy-reranker
+# dependency outside the bundle.
+def _area_xyxy(box: list[float]) -> float:
+    return max(0.0, float(box[2]) - float(box[0])) * max(0.0, float(box[3]) - float(box[1]))
+
+
+def iou_xyxy(a: list[float], b: list[float]) -> float:
+    ix1, iy1 = max(float(a[0]), float(b[0])), max(float(a[1]), float(b[1]))
+    ix2, iy2 = min(float(a[2]), float(b[2])), min(float(a[3]), float(b[3]))
+    inter = max(0.0, ix2 - ix1) * max(0.0, iy2 - iy1)
+    union = _area_xyxy(a) + _area_xyxy(b) - inter
+    return 0.0 if union <= 0 else float(inter / union)
+
+
+def candidate_laterality(cx_norm: float) -> str:
+    if cx_norm < 0.47:
+        return "right"
+    if cx_norm > 0.53:
+        return "left"
+    return "center"
+
+
+def _candidate_vertical(cy_norm: float) -> str:
+    if cy_norm < 0.24:
+        return "apical"
+    if cy_norm < 0.42:
+        return "upper"
+    if cy_norm < 0.68:
+        return "mid"
+    if cy_norm < 0.84:
+        return "lower"
+    return "basal"
+
+
+def target_match_score(row: pd.Series, target: dict[str, str]) -> float:
+    laterality = candidate_laterality(float(row.get("box_cx_norm", 0.5)))
+    vertical = _candidate_vertical(float(row.get("box_cy_norm", 0.5)))
+    target_laterality = str(target.get("laterality", "unknown"))
+    target_vertical = str(target.get("vertical", "unknown"))
+    score = 0.0
+    if target_laterality in {"right", "left"}:
+        if laterality == target_laterality:
+            score += 1.0
+        elif laterality in {"right", "left"}:
+            score -= 1.25
+        else:
+            score -= 0.2
+    if target_vertical in {"apical", "upper"}:
+        score += 0.75 if vertical in {"apical", "upper"} else (-0.75 if vertical in {"lower", "basal"} else 0.0)
+    elif target_vertical in {"lower", "basal"}:
+        score += 0.75 if vertical in {"lower", "basal"} else (-0.75 if vertical in {"apical", "upper"} else 0.0)
+    elif target_vertical == "mid" and vertical == "mid":
+        score += 0.5
+    return score
 
 
 # These cues explicitly describe more than one side, base, lobe, or focus.

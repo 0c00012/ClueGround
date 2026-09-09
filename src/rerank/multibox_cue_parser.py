@@ -183,9 +183,10 @@ def parse_precision_multibox_cue(
     """Use only high-precision phrase constructions as hard multi-box cues.
 
     Distribution words such as ``patchy``, ``diffuse``, and ``extensive`` can
-    describe one broad annotated rectangle. They remain scoring context, but
-    do not alone force another output box. This parser is opt-in so the
-    historical decoder remains reproducible.
+    describe one broad annotated rectangle.  They remain useful context for
+    candidate scoring, but do not by themselves force an extra prediction.
+    This parser is intentionally opt-in so the historical decoder remains
+    reproducible.
     """
     text = norm_text(phrase)
     base = parse_multibox_cue(
@@ -199,7 +200,12 @@ def parse_precision_multibox_cue(
     lat = str((rule_context or {}).get("laterality", laterality) or "unknown").lower()
     vert = str((rule_context or {}).get("vertical", vertical) or "unknown").lower()
 
-    has_side_pair = bool(re.search(r"\b(bilateral|bilaterally|both|right\s+and\s+left|left\s+and\s+right)\b", text))
+    has_side_pair = bool(
+        re.search(
+            r"\b(bilateral|bilaterally|both|right\s+and\s+left|left\s+and\s+right)\b",
+            text,
+        )
+    )
     has_basal_pair = bool(re.search(r"\b(bibasilar|bibasal|both\s+bases|lung\s+bases)\b", text))
     has_plural_effusions = bool(
         re.search(r"\bpleural\s+effusions\b|\beffusions\b", text)
@@ -208,10 +214,16 @@ def parse_precision_multibox_cue(
     has_multifocal = bool(re.search(r"\bmultifocal\b", text))
 
     if has_side_pair or has_basal_pair or has_plural_effusions:
+        # The established parser already supplies explicit left/right targets
+        # for these constructions.  Cap the floor at two rather than turning
+        # a descriptive modifier into an unsupported third box.
         base["has_multi_cue"] = True
         base["k_hint"] = 2
-        base["cue_debug_string"] = f"precision:{base.get('cue_debug_string', '')}; hard_floor=2"
+        base["cue_debug_string"] = (
+            f"precision:{base.get('cue_debug_string', '')}; hard_floor=2"
+        )
         return base
+
     if has_multifocal:
         return {
             "has_multi_cue": True,
@@ -222,6 +234,7 @@ def parse_precision_multibox_cue(
             "cue_source": "phrase",
             "cue_debug_string": "precision:multifocal; hard_floor=2; targets=[]",
         }
+
     return {
         "has_multi_cue": False,
         "multi_cue_type": "none",

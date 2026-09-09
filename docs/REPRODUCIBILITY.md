@@ -51,6 +51,7 @@ Paired, patient-cluster bootstrap comparisons and the manuscript number sheet:
 python scripts/compare_clueground_vs_medgrounder_ci_v1.py --extra reranker_noaux_valalpha=experiments/clueground_canonical_learned_reranker_noaux_assets_v1/learned/multibox_1444/seed_{seed}/eval_predictions.jsonl
 python scripts/compare_direct888_ci_v1.py
 python scripts/compile_reranker_paper_numbers_v1.py
+python scripts/compile_reranker_per_finding_v1.py
 ```
 
 End-to-end context comparison (unchanged from the submitted manuscript):
@@ -72,7 +73,10 @@ The standard seed list is `13, 42, 2026`. Aggregate means use the arithmetic mea
 ```bash
 python tools/verify_release.py
 python tools/audit_release_structure.py
+python tools/import_smoke.py
 python -m compileall -q scripts src baselines tools
 ```
+
+`tools/import_smoke.py` actually imports the re-ranker entry modules (the static audit does not follow relative imports inside `src/`). `src/three_task_grounding`, `src/rerank/{multibox_cue_parser,unified_adaptive_cardinality}.py` and `src/fair_baselines/metrics.py` are the method-package versions that the sealed runs resolved first on `sys.path`; they differ from the older repository copies and must not be replaced.
 
 The published checksum manifest verifies the code release itself, not protected datasets or model weights. The re-ranker runners additionally support `--audit-gold-mutation`, which perturbs evaluation labels and asserts that predictions do not change.

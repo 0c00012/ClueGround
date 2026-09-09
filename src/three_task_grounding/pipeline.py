@@ -8,7 +8,7 @@ import os
 import random
 import shutil
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -21,9 +21,6 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from torch.utils.data import DataLoader, TensorDataset
 
 from scripts.models_ms_cxr_vfm_localizer import PatchHeatmapBBoxHead, bbox_loss
-from scripts import run_ms_cxr_biomedclip_gated_hybrid_v1 as biomed
-from scripts import run_ms_cxr_siglip_candidate_fusion_v1 as siglip
-from scripts import run_ms_cxr_trainable_moe_gate_v1 as moe
 from src.fair_baselines.metrics import hull_box, iou_xyxy
 from src.rerank.multibox_cue_parser import cue_info_from_groups
 from src.rerank.unified_adaptive_cardinality import (
@@ -33,7 +30,7 @@ from src.rerank.unified_adaptive_cardinality import (
 )
 
 from .contracts import SPLITS, ProtocolSpec
-from .guards import BASE_RANKER_FEATURES, SEMANTIC_EXPERT_FEATURES, validate_ranker_schema
+from .guards import BASE_RANKER_FEATURES, validate_base_ranker_schema
 from .manifests import read_jsonl, write_jsonl
 from .metrics import singleton_projection, summarize_protocol
 from .queries import context_score, encode_query, stable_hash
@@ -41,7 +38,18 @@ from .queries import context_score, encode_query, stable_hash
 
 RAD_DINO_MODEL_ID = "microsoft/rad-dino"
 RAD_DINO_REVISION = "110cbc18d5133582e320b43d53bf5c44e410c936"
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+MSCXR_FINDINGS = (
+    "Atelectasis",
+    "Cardiomegaly",
+    "Consolidation",
+    "Edema",
+    "Lung Opacity",
+    "Pleural Effusion",
+    "Pneumonia",
+    "Pneumothorax",
+)
+MSCXR_FINDING_TO_ID = {name: index for index, name in enumerate(MSCXR_FINDINGS)}
 
 
 @dataclass(frozen=True)
@@ -61,6 +69,7 @@ class TaskRunConfig:
     device: str
     image_root: Path
     use_semantic_experts: bool
+    yolo_train_overrides: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_json(cls, path: Path) -> "TaskRunConfig":
@@ -80,7 +89,8 @@ class TaskRunConfig:
             pipeline_seed=int(payload["pipeline_seed"]),
             device=str(payload.get("device", "0")),
             image_root=Path(payload["image_root"]),
-            use_semantic_experts=bool(payload.get("use_semantic_experts", True)),
+            use_semantic_experts=bool(payload.get("use_semantic_experts", False)),
+            yolo_train_overrides=dict(payload.get("yolo_train_overrides", {})),
         )
 
 
@@ -188,6 +198,10 @@ class ThreeTaskPipeline:
     ) -> None:
         self.spec = spec
         self.config = config
+        if config.use_semantic_experts:
+            raise ValueError(
+                "This paper-method package excludes SigLIP, BioMedCLIP, and the semantic MoE gate"
+            )
         self.disable_rad_dino = disable_rad_dino
         self.force = force
         self.paths = TaskPaths.create(output_root, protocol_root, spec.key)
@@ -211,6 +225,12 @@ class ThreeTaskPipeline:
             label_ids = set(self.labels[split])
             if input_ids != label_ids:
                 raise RuntimeError(f"Input/label ID mismatch for {self.spec.key}/{split}")
+            if self.spec.key == "mscxr_multibox_1444":
+                invalid = [row.get("finding", "") for row in self.inputs[split] if row.get("finding", "") not in MSCXR_FINDING_TO_ID]
+                if invalid:
+                    raise RuntimeError(
+                        "MS-CXR protocol bundle is stale or missing the finding query; rebuild it before training"
+                    )
         _write_json(
             self.paths.root / "run_contract.json",
             {
@@ -242,21 +262,21 @@ class ThreeTaskPipeline:
                         for model_name in self.config.yolo_models
                     ],
                     "rad_dino": {"model_id": RAD_DINO_MODEL_ID, "revision": RAD_DINO_REVISION},
-                    "siglip": {
-                        "enabled": self.config.use_semantic_experts,
-                        "model_id": "google/siglip-base-patch16-224",
-                        "revision": siglip.SIGLIP_REVISIONS["google/siglip-base-patch16-224"],
-                    },
-                    "biomedclip": {
-                        "enabled": self.config.use_semantic_experts,
-                        "model_id": "microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
-                        "revision": biomed.BIOMEDCLIP_REVISIONS[
-                            "microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224"
-                        ],
-                    },
+                    "siglip": {"enabled": False, "excluded_from_paper_method": True},
+                    "biomedclip": {"enabled": False, "excluded_from_paper_method": True},
                 },
             },
         )
+
+    def _yolo_class_names(self) -> tuple[str, ...]:
+        if self.spec.key == "mscxr_multibox_1444":
+            return MSCXR_FINDINGS
+        return ("target_region",)
+
+    def _yolo_class_id(self, row: dict[str, Any]) -> int:
+        if self.spec.key == "mscxr_multibox_1444":
+            return MSCXR_FINDING_TO_ID[str(row["finding"])]
+        return 0
 
     def build_yolo_dataset(self) -> None:
         dataset = self.paths.yolo_dataset
@@ -296,8 +316,9 @@ class ThreeTaskPipeline:
                 )
                 item["group_ids"].append(str(row["group_id"]))
                 for box in self.labels[split][str(row["group_id"])]:
-                    key = tuple(round(float(value), 4) for value in box)
-                    item["boxes"][key] = box
+                    class_id = self._yolo_class_id(row)
+                    key = (class_id, *(round(float(value), 4) for value in box))
+                    item["boxes"][key] = {"class_id": class_id, "box": box}
 
             image_list: list[str] = []
             for source_path, item in sorted(by_image.items()):
@@ -306,9 +327,9 @@ class ThreeTaskPipeline:
                 label_path = dataset / "labels" / relative.with_suffix(".txt")
                 label_path.parent.mkdir(parents=True, exist_ok=True)
                 lines = []
-                for box in item["boxes"].values():
-                    cx, cy, bw, bh = _xyxy_to_yolo(box, item["width"], item["height"])
-                    lines.append(f"0 {cx:.8f} {cy:.8f} {bw:.8f} {bh:.8f}")
+                for target in item["boxes"].values():
+                    cx, cy, bw, bh = _xyxy_to_yolo(target["box"], item["width"], item["height"])
+                    lines.append(f"{target['class_id']} {cx:.8f} {cy:.8f} {bw:.8f} {bh:.8f}")
                 label_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
                 # Keep the path through yolo_dataset/images. Resolving the
                 # junction would point back to E:/... and Ultralytics would no
@@ -326,12 +347,15 @@ class ThreeTaskPipeline:
                 )
             (dataset / f"{split}.txt").write_text("\n".join(image_list) + "\n", encoding="utf-8")
 
+        # Ultralytics resolves a relative dataset root against its global
+        # settings directory on Windows, not against this experiment root.
+        # Keep all task.yaml paths absolute so a reproduced run is portable.
         yaml_lines = [
-            f"path: {dataset.as_posix()}",
+            f"path: {dataset.absolute().as_posix()}",
             "train: train.txt",
             "val: val.txt",
             "names:",
-            "  0: medical_region",
+            *[f"  {class_id}: {name}" for class_id, name in enumerate(self._yolo_class_names())],
             "",
         ]
         (dataset / "task.yaml").write_text("\n".join(yaml_lines), encoding="utf-8")
@@ -340,21 +364,40 @@ class ThreeTaskPipeline:
             dataset / "supervision_contract.json",
             {
                 "status": "PASS",
-                "class_agnostic": True,
-                "n_classes": 1,
+                "class_agnostic": self.spec.key != "mscxr_multibox_1444",
+                "n_classes": len(self._yolo_class_names()),
+                "class_names": list(self._yolo_class_names()),
                 "eval_labels_materialized": False,
                 "task_isolated": True,
-                "query_or_category_used_by_yolo": False,
+                "finding_query_used_to_select_yolo_class": True,
             },
         )
 
     def train_yolo(self) -> dict[str, Path]:
         from ultralytics import YOLO
 
+        allowed_overrides = {
+            "close_mosaic",
+            "hsv_h",
+            "hsv_s",
+            "hsv_v",
+            "degrees",
+            "translate",
+            "scale",
+            "shear",
+            "flipud",
+            "fliplr",
+            "mosaic",
+            "mixup",
+            "erasing",
+        }
+        unsupported = sorted(set(self.config.yolo_train_overrides) - allowed_overrides)
+        if unsupported:
+            raise ValueError(f"Unsupported YOLO train overrides: {unsupported}")
         weights: dict[str, Path] = {}
         for model_name in self.config.yolo_models:
             tag = Path(model_name).stem
-            run_name = f"{tag}_{self.spec.key}_classagnostic_e{self.config.yolo_epochs}"
+            run_name = f"{tag}_{self.spec.key}_finding_conditioned_e{self.config.yolo_epochs}"
             best = self.paths.yolo_runs / run_name / "weights" / "best.pt"
             if not best.exists() or self.force:
                 initialization = PROJECT_ROOT / model_name
@@ -372,6 +415,7 @@ class ThreeTaskPipeline:
                     pretrained=True,
                     seed=self.config.pipeline_seed,
                     patience=max(20, min(50, self.config.yolo_epochs // 2)),
+                    **self.config.yolo_train_overrides,
                 )
                 del model
                 gc.collect()
@@ -433,6 +477,7 @@ class ThreeTaskPipeline:
                             continue
                         boxes = result.boxes.xyxy.detach().cpu().numpy()
                         scores = result.boxes.conf.detach().cpu().numpy()
+                        classes = result.boxes.cls.detach().cpu().numpy().astype(int)
                         order = np.argsort(-scores, kind="stable")
                         for rank, index in enumerate(order):
                             rows.append(
@@ -442,6 +487,8 @@ class ThreeTaskPipeline:
                                     "source_model": tag,
                                     "rank": rank,
                                     "confidence": float(scores[index]),
+                                    "class_id": int(classes[index]),
+                                    "class_name": self._yolo_class_names()[int(classes[index])],
                                     "pred_x1": float(boxes[index, 0]),
                                     "pred_y1": float(boxes[index, 1]),
                                     "pred_x2": float(boxes[index, 2]),
@@ -665,7 +712,11 @@ class ThreeTaskPipeline:
                 group_id = str(source["group_id"])
                 raw_candidates: list[dict[str, Any]] = []
                 detector_rows = by_dicom.get(str(source["dicom_id"]), pd.DataFrame())
+                finding = str(source.get("finding", ""))
+                finding_id = self._yolo_class_id(source)
                 if len(detector_rows):
+                    if self.spec.key == "mscxr_multibox_1444":
+                        detector_rows = detector_rows[detector_rows["class_id"].astype(int).eq(finding_id)]
                     for model_name, model_rows in detector_rows.groupby("source_model", sort=True):
                         for row in model_rows.sort_values(["rank", "confidence"], ascending=[True, False]).head(
                             self.config.candidate_top_per_detector
@@ -681,10 +732,7 @@ class ThreeTaskPipeline:
                 dino_box = rad_map.get(group_id)
                 if dino_box is not None:
                     raw_candidates.append(
-                        # The RAD bbox head has no calibrated detector confidence.
-                        # Keep the missing-confidence value neutral instead of
-                        # presenting it to the ranker as a perfect YOLO score.
-                        {"source_model": "rad_dino", "rank": 0, "confidence": 0.0, "box": dino_box}
+                        {"source_model": "rad_dino", "rank": 0, "confidence": 1.0, "box": dino_box}
                     )
                 if not raw_candidates:
                     raw_candidates.append(
@@ -731,8 +779,8 @@ class ThreeTaskPipeline:
                             "image_height": source["image_height"],
                             "claim_sentence": source["query_text"],
                             "query_text": source["query_text"],
-                            # The semantic scorers accept a finding column, but strict runs leave it blank.
-                            "finding": "",
+                            "finding": finding,
+                            "finding_class_id": finding_id,
                             "source_model": candidate["source_model"],
                             "rank": candidate["rank"],
                             "rank_norm": 1.0 / (1.0 + float(candidate["rank"])),
@@ -760,59 +808,20 @@ class ThreeTaskPipeline:
                     )
             pd.DataFrame(output_rows).to_csv(output, index=False)
 
-    def score_semantics(self) -> None:
-        if not self.config.use_semantic_experts:
-            for split in SPLITS:
-                source = self.paths.candidates / f"{split}.csv"
-                output = self.paths.semantic / f"{split}.csv"
-                if output.exists() and not self.force:
-                    continue
-                pd.read_csv(source).to_csv(output, index=False)
-            _write_json(
-                self.paths.semantic / "status.json",
-                {
-                    "status": "disabled_for_main_method",
-                    "siglip_enabled": False,
-                    "biomedclip_enabled": False,
-                    "replacement": "YOLO/RAD-DINO HGB ranker plus raw-phrase rule context",
-                },
-            )
-            return
+    def prepare_ranker_inputs(self) -> None:
         for split in SPLITS:
+            source = self.paths.candidates / f"{split}.csv"
             output = self.paths.semantic / f"{split}.csv"
             if output.exists() and not self.force:
                 continue
-            candidates = pd.read_csv(self.paths.candidates / f"{split}.csv")
-            scored = siglip.score_siglip(
-                candidates,
-                "google/siglip-base-patch16-224",
-                "cxr_claim",
-                0.15,
-                32,
-            )
-            gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            scored = biomed.score_biomedclip(
-                scored,
-                "microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
-                "cxr_claim",
-                0.15,
-                32,
-            )
-            scored.to_csv(output, index=False)
-            gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
+            pd.read_csv(source).to_csv(output, index=False)
         _write_json(
             self.paths.semantic / "status.json",
             {
-                "status": "complete",
-                "siglip_enabled": True,
-                "biomedclip_enabled": True,
-                "query_input": "raw phrase only",
-                "finding_annotation_used": False,
-                "candidate_features": list(SEMANTIC_EXPERT_FEATURES),
+                "status": "disabled_for_main_method",
+                "siglip_enabled": False,
+                "biomedclip_enabled": False,
+                "note": "Compatibility pass-through directory; no semantic score is computed.",
             },
         )
 
@@ -829,13 +838,7 @@ class ThreeTaskPipeline:
         return np.asarray(values, dtype=np.float32)
 
     def fit_ranker(self) -> HistGradientBoostingRegressor:
-        requested_features = list(BASE_RANKER_FEATURES)
-        if self.config.use_semantic_experts:
-            requested_features.extend(SEMANTIC_EXPERT_FEATURES)
-        features = validate_ranker_schema(
-            requested_features,
-            include_semantic=self.config.use_semantic_experts,
-        )
+        features = validate_base_ranker_schema(BASE_RANKER_FEATURES)
         inference_audit = []
         for split in ("val", "eval"):
             inference = pd.read_csv(self.paths.semantic / f"{split}.csv")
@@ -844,17 +847,18 @@ class ThreeTaskPipeline:
                 for column in inference.columns
                 if column in {"target_iou", "gold_boxes_xyxy", "gold_count", "bbox_name_reference", "object_name_reference"}
             ]
-            finding_nonempty = int(
-                inference.get("finding", pd.Series(dtype=str)).fillna("").astype(str).str.strip().ne("").sum()
+            invalid_findings = sorted(
+                set(inference.get("finding", pd.Series(dtype=str)).fillna("").astype(str))
+                - set(MSCXR_FINDINGS)
             )
             inference_audit.append(
                 {
                     "split": split,
                     "forbidden_label_columns": forbidden_labels,
-                    "finding_annotation_nonempty_rows": finding_nonempty,
+                    "invalid_finding_queries": invalid_findings,
                     "model_feature_columns": features,
                     "source_model_present_as_debug_only": "source_model" in inference.columns,
-                    "pass": not forbidden_labels and finding_nonempty == 0,
+                    "pass": not forbidden_labels and not invalid_findings,
                 }
             )
         if not all(row["pass"] for row in inference_audit):
@@ -866,85 +870,14 @@ class ThreeTaskPipeline:
         train = pd.read_csv(self.paths.semantic / "train.csv")
         train["target_iou"] = self._target_iou_for_candidates(train, self.labels["train"])
         train.to_csv(self.paths.ranker / "ranker_training_table.csv", index=False)
-        if self.config.use_semantic_experts:
-            val = pd.read_csv(self.paths.semantic / "val.csv")
-            val_target = self._target_iou_for_candidates(val, self.labels["val"])
-            selection_rows: list[dict[str, Any]] = []
-            best_key: tuple[float, float, float] | None = None
-            best_model: HistGradientBoostingRegressor | None = None
-            for max_leaf_nodes in (3, 7, 15):
-                for min_samples_leaf in (20, 50, 100):
-                    for l2_regularization in (0.1, 1.0, 5.0):
-                        for max_iter in (80, 160):
-                            candidate_model = HistGradientBoostingRegressor(
-                                max_iter=max_iter,
-                                learning_rate=0.05,
-                                max_leaf_nodes=max_leaf_nodes,
-                                min_samples_leaf=min_samples_leaf,
-                                l2_regularization=l2_regularization,
-                                random_state=self.config.pipeline_seed,
-                            )
-                            candidate_model.fit(
-                                train[features].fillna(0.0),
-                                train["target_iou"].astype(float),
-                            )
-                            scored_val = val[["group_id", "candidate_id"]].copy()
-                            scored_val["score"] = candidate_model.predict(val[features].fillna(0.0))
-                            scored_val["target_iou_selection_only"] = val_target
-                            winners = (
-                                scored_val.sort_values(
-                                    ["group_id", "score", "candidate_id"],
-                                    ascending=[True, False, True],
-                                    kind="stable",
-                                )
-                                .groupby("group_id", sort=False)
-                                .head(1)
-                            )
-                            mean_iou = float(winners["target_iou_selection_only"].mean())
-                            hit_05 = float((winners["target_iou_selection_only"] >= 0.5).mean())
-                            train_pred = candidate_model.predict(train[features].fillna(0.0))
-                            train_mse = float(np.mean((train_pred - train["target_iou"].to_numpy()) ** 2))
-                            selection_rows.append(
-                                {
-                                    "max_leaf_nodes": max_leaf_nodes,
-                                    "min_samples_leaf": min_samples_leaf,
-                                    "l2_regularization": l2_regularization,
-                                    "max_iter": max_iter,
-                                    "val_top1_mean_iou": mean_iou,
-                                    "val_top1_hit_0_5": hit_05,
-                                    "train_candidate_mse": train_mse,
-                                }
-                            )
-                            key = (mean_iou, hit_05, -train_mse)
-                            if best_key is None or key > best_key:
-                                best_key = key
-                                best_model = candidate_model
-            if best_model is None:
-                raise RuntimeError("Semantic HGB validation grid produced no model")
-            model = best_model
-            grid = pd.DataFrame(selection_rows).sort_values(
-                ["val_top1_mean_iou", "val_top1_hit_0_5", "train_candidate_mse"],
-                ascending=[False, False, True],
-            )
-            grid.to_csv(self.paths.ranker / "hgb_validation_grid.csv", index=False)
-            _write_json(
-                self.paths.ranker / "hgb_selection.json",
-                {
-                    "selection_split": "val only",
-                    "selection_metric": "top1 mean IoU, then Hit@0.5",
-                    "selected": grid.iloc[0].to_dict(),
-                    "n_candidates": len(selection_rows),
-                },
-            )
-        else:
-            model = HistGradientBoostingRegressor(
-                max_iter=160,
-                learning_rate=0.05,
-                max_leaf_nodes=15,
-                l2_regularization=1e-3,
-                random_state=self.config.pipeline_seed,
-            )
-            model.fit(train[features].fillna(0.0), train["target_iou"].astype(float))
+        model = HistGradientBoostingRegressor(
+            max_iter=160,
+            learning_rate=0.05,
+            max_leaf_nodes=15,
+            l2_regularization=1e-3,
+            random_state=self.config.pipeline_seed,
+        )
+        model.fit(train[features].fillna(0.0), train["target_iou"].astype(float))
         joblib.dump(
             {"model": model, "feature_columns": features, "random_state": self.config.pipeline_seed},
             self.paths.ranker / "base_candidate_ranker.joblib",
@@ -957,18 +890,14 @@ class ThreeTaskPipeline:
                 "training_label_present_only_in": "ranker_training_table.csv",
                 "inference_tables_contain_training_label": False,
                 "source_model_used_as_feature": False,
-                "query_text_used_by": (
-                    "context parser only"
-                    if not self.config.use_semantic_experts
-                    else "semantic experts and context parser"
-                ),
+                "query_text_used_by": "context parser only",
             },
         )
         for split in SPLITS:
             frame = pd.read_csv(self.paths.semantic / f"{split}.csv")
             frame["base_score"] = model.predict(frame[features].fillna(0.0))
             if "target_iou" in frame.columns:
-                raise RuntimeError(f"Target leaked into semantic inference table: {split}")
+                raise RuntimeError(f"Target leaked into ranker inference table: {split}")
             frame.to_csv(self.paths.ranker / f"scored_{split}.csv", index=False)
         return model
 
@@ -979,47 +908,13 @@ class ThreeTaskPipeline:
             groups[group_id] = {
                 "group_id": group_id,
                 "subject_id": row["subject_id"],
-                "finding": "",
+                "finding": row["finding"],
                 "claim_sentence": row["query_text"],
                 "image_width": int(row["image_width"]),
                 "image_height": int(row["image_height"]),
                 "gt_boxes": self.labels[split][group_id],
             }
         return groups
-
-    def _expert_bundle(self, split: str) -> moe.ExpertBundle:
-        if not self.config.use_semantic_experts:
-            raise RuntimeError("Semantic expert bundle requested for the no-semantic main method")
-        groups = self._groups(split)
-        scored = pd.read_csv(self.paths.ranker / f"scored_{split}.csv")
-
-        def expert_map(score_column: str, source_name: str) -> dict[str, list[dict[str, Any]]]:
-            mapping: dict[str, list[dict[str, Any]]] = {}
-            for group_id, part in scored.groupby("group_id", sort=False):
-                row = part.sort_values([score_column, "candidate_id"], ascending=[False, True]).iloc[0]
-                mapping[str(group_id)] = [
-                    {
-                        "box": [float(row.pred_x1), float(row.pred_y1), float(row.pred_x2), float(row.pred_y2)],
-                        "score": float(row[score_column]),
-                        "source": source_name,
-                    }
-                ]
-            return mapping
-
-        hybrid = expert_map("base_score", "base_candidate_ranker")
-        siglip_map = expert_map("siglip_rank", "siglip")
-        biomed_map = expert_map("biomedclip_rank", "biomedclip")
-        cue_info = cue_info_from_groups(groups) if self.spec.output_mode == "variable_set" else {}
-        cue = pd.DataFrame(
-            [
-                {
-                    "group_id": group_id,
-                    "has_multi_cue": bool(cue_info.get(group_id, {}).get("has_multi_cue", False)),
-                }
-                for group_id in groups
-            ]
-        )
-        return moe.ExpertBundle(groups, hybrid, siglip_map, biomed_map, {}, cue)
 
     @staticmethod
     def _boxes_only(predictions: dict[str, list[dict[str, Any]]]) -> dict[str, list[list[float]]]:
@@ -1110,7 +1005,7 @@ class ThreeTaskPipeline:
             )
         return predictions, pd.DataFrame(audit_rows)
 
-    def _decode_main_without_semantic_experts(self) -> None:
+    def _decode_main(self) -> None:
         seed = self.config.pipeline_seed
         val_groups = self._groups("val")
         eval_groups = self._groups("eval")
@@ -1167,7 +1062,7 @@ class ThreeTaskPipeline:
         pd.DataFrame(detail).to_csv(self.paths.metrics / "eval_detail_main.csv", index=False)
         result = {
             "status": "complete",
-            "method": "ClueGround-VFM YOLO-RAD-DINO rule-context strict local",
+            "method": "ClueGround-VFM finding-conditioned YOLO-RAD-DINO rule-context local",
             "protocol_key": self.spec.key,
             "n_upstream_seeds": 1,
             "n_gate_seeds": 0,
@@ -1178,7 +1073,8 @@ class ThreeTaskPipeline:
             "semantic_experts_enabled": False,
             "siglip_enabled": False,
             "biomedclip_enabled": False,
-            "annotation_category_as_inference_input": False,
+            "finding_query_as_inference_input": True,
+            "finding_query_is_spatial_gold": False,
             "cig_anatomy_box_pretraining": False,
             "model_components": [
                 "YOLOv8s",
@@ -1199,100 +1095,12 @@ class ThreeTaskPipeline:
         _write_json(self.paths.metrics / "aggregate.json", result)
         _write_json(self.paths.root / "RUN_STATUS.json", result)
 
-    def train_gate_and_decode(self) -> None:
+    def fit_ranker_and_decode(self) -> None:
         # Deterministic and cheap compared with the vision stages. Refit here
         # so a partially written run cannot reuse a model without its matching
         # scored inference tables.
         self.fit_ranker()
-        if not self.config.use_semantic_experts:
-            self._decode_main_without_semantic_experts()
-            return
-        train_bundle = self._expert_bundle("train")
-        val_bundle = self._expert_bundle("val")
-        eval_bundle = self._expert_bundle("eval")
-        moe.CKPT = self.paths.gate / "checkpoints"
-        moe.LOG = self.paths.gate / "logs"
-        moe.MET = self.paths.gate / "metrics"
-        moe.PRED = self.paths.gate / "predictions"
-        for path in (moe.CKPT, moe.LOG, moe.MET, moe.PRED):
-            path.mkdir(parents=True, exist_ok=True)
-        experts = ["hybrid", "siglip", "biomed"]
-        seed_summaries = []
-        for seed in self.config.gate_seeds:
-            name = f"{self.spec.key}_hybrid_siglip_biomed_s{seed}"
-            model, params, _, _ = moe.train_gate(
-                name,
-                train_bundle,
-                val_bundle,
-                experts,
-                hardneg=False,
-                seed=seed,
-                device=str(self.torch_device),
-            )
-            val_predictions, val_audit = moe.predict_gate(
-                name,
-                model,
-                val_bundle,
-                experts,
-                device=str(self.torch_device),
-                keep_multi=False,
-            )
-            eval_predictions, eval_audit = moe.predict_gate(
-                name,
-                model,
-                eval_bundle,
-                experts,
-                device=str(self.torch_device),
-                keep_multi=False,
-            )
-            if self.spec.output_mode == "variable_set":
-                cardinality_params = self._select_cardinality_policy(
-                    val_bundle.groups,
-                    val_predictions,
-                    seed,
-                )
-                eval_candidates = pd.read_csv(self.paths.ranker / "scored_eval.csv")
-                eval_index = prepare_candidate_index(eval_candidates, score_col="base_score", max_top_n=400)
-                eval_predictions, cardinality_audit = apply_unified_adaptive_cardinality(
-                    eval_predictions,
-                    eval_index,
-                    cue_info_from_groups(eval_bundle.groups),
-                    eval_bundle.groups,
-                    cardinality_params,
-                    score_col="base_score",
-                )
-                cardinality_audit.to_csv(self.paths.gate / f"cardinality_eval_audit_s{seed}.csv", index=False)
-            boxes = self._boxes_only(eval_predictions)
-            prediction_rows = [
-                {"protocol_key": self.spec.key, "group_id": group_id, "pred_boxes_xyxy": pred_boxes}
-                for group_id, pred_boxes in sorted(boxes.items())
-            ]
-            write_jsonl(self.paths.predictions / f"eval_predictions_s{seed}.jsonl", prediction_rows)
-            val_audit.to_csv(self.paths.gate / f"val_gate_audit_s{seed}.csv", index=False)
-            eval_audit.to_csv(self.paths.gate / f"eval_gate_audit_s{seed}.csv", index=False)
-            summary, detail = summarize_protocol(self.spec, self.inputs["eval"], self.labels["eval"], boxes)
-            if self.spec.key == "mscxr_multibox_1444":
-                summary.update(singleton_projection(self.inputs["eval"], self.labels["eval"], boxes))
-            pd.DataFrame(detail).to_csv(self.paths.metrics / f"eval_detail_s{seed}.csv", index=False)
-            seed_summaries.append({"gate_seed": seed, **params, **summary})
-        result = pd.DataFrame(seed_summaries)
-        result.to_csv(self.paths.metrics / "eval_by_gate_seed.csv", index=False)
-        metric_columns = [column for column in self.spec.primary_metrics if column in result]
-        aggregate = {
-            "protocol_key": self.spec.key,
-            "n_upstream_seeds": 1,
-            "n_gate_seeds": len(self.config.gate_seeds),
-            "pipeline_seed": self.config.pipeline_seed,
-            "seed_scope": "one fixed upstream pipeline; gate seeds only",
-            "task_isolated": True,
-            "rad_dino_enabled": not self.disable_rad_dino,
-            "target_semantics": self.spec.target_semantics,
-        }
-        for column in metric_columns:
-            aggregate[column] = float(result[column].mean())
-            aggregate[f"{column}_std_gate_only"] = float(result[column].std(ddof=1)) if len(result) > 1 else 0.0
-        _write_json(self.paths.metrics / "aggregate.json", aggregate)
-        _write_json(self.paths.root / "RUN_STATUS.json", {"status": "complete", **aggregate})
+        self._decode_main()
 
     def run(self, stages: Iterable[str]) -> None:
         requested = [stage.strip() for stage in stages if stage.strip()]
@@ -1313,9 +1121,9 @@ class ThreeTaskPipeline:
                 self.predict_yolo(weights)
             self.build_candidates()
         if "semantic" in requested:
-            self.score_semantics()
+            self.prepare_ranker_inputs()
         if "ranker_gate" in requested:
-            self.train_gate_and_decode()
+            self.fit_ranker_and_decode()
 
 
 def planned_stages() -> tuple[str, ...]:

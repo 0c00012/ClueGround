@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from scipy import ndimage
+from scipy.optimize import linear_sum_assignment
 
-from .mscxr_data import GroundingSample
+if TYPE_CHECKING:
+    from .mscxr_data import GroundingSample
 
 
 def box_area(box: list[float] | tuple[float, ...]) -> float:
@@ -81,23 +83,17 @@ def evaluate_set(
     n_gt, n_pred = len(gt_boxes), len(pred_boxes)
     gt_best = [max((iou_xyxy(gt, pred) for pred in pred_boxes), default=0.0) for gt in gt_boxes]
 
-    def greedy_tp(threshold: float) -> int:
-        pairs = sorted(
-            (
-                (iou_xyxy(gt, pred), gt_index, pred_index)
-                for gt_index, gt in enumerate(gt_boxes)
-                for pred_index, pred in enumerate(pred_boxes)
-                if iou_xyxy(gt, pred) >= threshold
-            ),
-            reverse=True,
+    def optimal_tp(threshold: float) -> int:
+        if not gt_boxes or not pred_boxes:
+            return 0
+        ious = np.asarray(
+            [[iou_xyxy(gt, pred) for pred in pred_boxes] for gt in gt_boxes],
+            dtype=np.float64,
         )
-        used_gt: set[int] = set()
-        used_pred: set[int] = set()
-        for _, gt_index, pred_index in pairs:
-            if gt_index not in used_gt and pred_index not in used_pred:
-                used_gt.add(gt_index)
-                used_pred.add(pred_index)
-        return len(used_gt)
+        # A binary assignment cost maximizes the number of threshold-valid
+        # one-to-one matches, independent of the order of boxes.
+        rows, columns = linear_sum_assignment((ious < threshold).astype(np.int8))
+        return int(np.sum(ious[rows, columns] >= threshold))
 
     result: dict[str, float] = {
         "coverage_mean_iou": float(np.mean(gt_best)) if gt_best else 0.0,
@@ -111,7 +107,7 @@ def evaluate_set(
         "pred_count_abs_error": float(abs(n_pred - n_gt)),
     }
     for name, threshold in (("0_3", 0.3), ("0_5", 0.5)):
-        tp = greedy_tp(threshold)
+        tp = optimal_tp(threshold)
         precision = tp / n_pred if n_pred else 0.0
         recall = tp / n_gt if n_gt else 0.0
         result[f"set_precision_{name}"] = precision
@@ -236,27 +232,21 @@ def tune_mask_decoder(
     probabilities: list[np.ndarray],
     samples: list[GroundingSample],
     geometries: list[dict[str, Any]],
-    singlebox_only: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     grid_rows: list[dict[str, Any]] = []
-    max_component_values = (1,) if singlebox_only else (1, 2, 3)
     for threshold, min_area, max_components in itertools.product(
-        (0.25, 0.35, 0.45, 0.55, 0.65), (0.0005, 0.002, 0.005), max_component_values
+        (0.25, 0.35, 0.45, 0.55, 0.65), (0.0005, 0.002, 0.005), (1, 2, 3)
     ):
         records = []
         for probability, sample, geometry in zip(probabilities, samples, geometries):
             boxes, scores = decode_probability_mask(probability, geometry, threshold, min_area, max_components)
             records.append({"sample": sample, "pred_boxes": boxes, "scores": scores})
-        single, metrics = summarize_records(records)
-        selection_score = (
-            float(single["mean_iou"])
-            if singlebox_only
-            else float(
-                0.25 * metrics["coverage_mean_iou"]
-                + 0.25 * metrics["exact_union_iou"]
-                + 0.25 * metrics["set_f1_0_3"]
-                + 0.25 * metrics["set_f1_0_5"]
-            )
+        _, metrics = summarize_records(records)
+        selection_score = float(
+            0.25 * metrics["coverage_mean_iou"]
+            + 0.25 * metrics["exact_union_iou"]
+            + 0.25 * metrics["set_f1_0_3"]
+            + 0.25 * metrics["set_f1_0_5"]
         )
         grid_rows.append(
             {
