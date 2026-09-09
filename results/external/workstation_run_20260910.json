@@ -1,0 +1,38 @@
+{
+  "_source": "Linux 3090 Ti workstation run of padchest_gr_external_eval_bundle_20260910.zip (user report, 2026-09-10); archive /home/siyoung/MIMIX/padchest_gr_results.tar.gz not yet copied to this machine",
+  "environment": {"python": "3.11.16", "torch": "2.7.0+cu118", "torchvision": "0.22.0", "scikit-learn": "1.6.1", "numpy": "1.26.4", "transformers": "4.52.4", "ultralytics": "8.3.133", "gpu": "RTX 3090 Ti"},
+  "runtime_seconds": 350,
+  "scorer_control": {"strict": {"13": 0.0, "42": 0.0, "2026": 0.0}, "extended": {"13": 0.0, "42": 0.0, "2026": 0.0}},
+  "protocol": {"strict": {"n_rows": 194, "n_images": 165, "n_patients": 161}, "extended": {"n_rows": 278, "n_images": 220, "n_patients": 214}},
+  "clueground_reranker_per_seed": {
+    "strict": {
+      "coverage_iou": {"13": 0.54141, "42": 0.53006, "2026": 0.53610},
+      "exact_union_iou": {"13": 0.54438, "42": 0.53362, "2026": 0.53819},
+      "set_f1_optimal_0_3": {"13": 0.78694, "42": 0.76632, "2026": 0.77234},
+      "set_f1_optimal_0_5": {"13": 0.66409, "42": 0.62543, "2026": 0.62457}
+    },
+    "extended": {
+      "coverage_iou": {"13": 0.46677, "42": 0.47035, "2026": 0.46466},
+      "exact_union_iou": {"13": 0.46794, "42": 0.47377, "2026": 0.46629},
+      "set_f1_optimal_0_3": {"13": 0.69796, "42": 0.70935, "2026": 0.68837},
+      "set_f1_optimal_0_5": {"13": 0.51403, "42": 0.51763, "2026": 0.50659}
+    }
+  },
+  "aggregate": {
+    "strict": {
+      "clueground_reranker": {"coverage_iou": [0.5359, 0.0057], "exact_union_iou": [0.5387, 0.0054], "set_f1_optimal_0_3": [0.7752, 0.0106], "set_f1_optimal_0_5": [0.6380, 0.0226]},
+      "hybrid_no_reranker": {"coverage_iou": [0.4897, 0.0135], "exact_union_iou": [0.4913, 0.0141], "set_f1_optimal_0_3": [0.7002, 0.0382], "set_f1_optimal_0_5": [0.5845, 0.0140]},
+      "rad_dino_only": {"coverage_iou": [0.4419, 0.0167], "exact_union_iou": [0.4532, 0.0161], "set_f1_optimal_0_3": [0.6850, 0.0308], "set_f1_optimal_0_5": [0.4863, 0.0394]}
+    },
+    "extended": {
+      "clueground_reranker": {"coverage_iou": [0.4673, 0.0029], "exact_union_iou": [0.4693, 0.0039], "set_f1_optimal_0_3": [0.6986, 0.0105], "set_f1_optimal_0_5": [0.5127, 0.0056]},
+      "hybrid_no_reranker": {"coverage_iou": [0.4307, 0.0178], "exact_union_iou": [0.4309, 0.0177], "set_f1_optimal_0_3": [0.6267, 0.0293], "set_f1_optimal_0_5": [0.4706, 0.0263]},
+      "rad_dino_only": {"coverage_iou": [0.3853, 0.0161], "exact_union_iou": [0.4051, 0.0152], "set_f1_optimal_0_3": [0.5943, 0.0256], "set_f1_optimal_0_5": [0.3773, 0.0381]}
+    }
+  },
+  "baselines_strict_zero_shot_single_box": {
+    "_note": "sealed MS-CXR-1444 seed 13/42/2026 checkpoints applied eval-only on the workstation (one box per sentence, same protocol CSV, same common evaluator, missing_predictions=0). MedRPG native wrapper printed test_set_total_miou=0.0 (reporting artifact of the patched eval_category aggregation on a non-MIMIC split; saved boxes are valid). MedGrounder: no trained checkpoint available on the workstation.",
+    "medrpg": {"coverage_iou": [0.4593, 0.0270], "exact_union_iou": [0.4719, 0.0273], "set_f1_optimal_0_3": [0.6753, 0.0372], "set_f1_optimal_0_5": [0.4588, 0.0464]},
+    "transvg": {"coverage_iou": [0.4497, 0.0171], "exact_union_iou": [0.4633, 0.0165], "set_f1_optimal_0_3": [0.6609, 0.0378], "set_f1_optimal_0_5": [0.4582, 0.0330]}
+  }
+}
