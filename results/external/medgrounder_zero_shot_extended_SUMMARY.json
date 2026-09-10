@@ -1,0 +1,110 @@
+{
+  "method": "medgrounder_zero_shot",
+  "protocol_root": "C:\\Users\\_idal\\Documents\\MIMIC-CXR\\mimic_cxr_yovis_project\\experiments\\padchest_gr_external_v1\\protocol_extended",
+  "n_rows": 278,
+  "seeds": [
+    13,
+    42,
+    2026
+  ],
+  "aggregate": {
+    "coverage_iou": {
+      "mean": 0.41495599828685875,
+      "std": 0.004582752831505866,
+      "per_seed": [
+        0.40970883063587366,
+        0.41817291780697696,
+        0.4169862464177255
+      ]
+    },
+    "exact_union_iou": {
+      "mean": 0.40625062001062734,
+      "std": 0.003974656266784825,
+      "per_seed": [
+        0.40191934372627686,
+        0.4097307644291509,
+        0.4071017518764543
+      ]
+    },
+    "set_f1_optimal_0_3": {
+      "mean": 0.6193045563549161,
+      "std": 0.00797970414003591,
+      "per_seed": [
+        0.6220623501199041,
+        0.6103117505995204,
+        0.6255395683453238
+      ]
+    },
+    "set_f1_optimal_0_5": {
+      "mean": 0.3960031974420463,
+      "std": 0.00295736382632868,
+      "per_seed": [
+        0.3994004796163069,
+        0.39460431654676253,
+        0.39400479616306955
+      ]
+    }
+  },
+  "per_finding": {
+    "Atelectasis": {
+      "n": 45,
+      "coverage_iou": 0.27064989135490203,
+      "exact_union_iou": 0.2544595701201326,
+      "set_f1_optimal_0_3": 0.4246913580246913,
+      "set_f1_optimal_0_5": 0.13333333333333333
+    },
+    "Cardiomegaly": {
+      "n": 99,
+      "coverage_iou": 0.5462699410302265,
+      "exact_union_iou": 0.5472298378663724,
+      "set_f1_optimal_0_3": 0.7508417508417509,
+      "set_f1_optimal_0_5": 0.734006734006734
+    },
+    "Consolidation": {
+      "n": 4,
+      "coverage_iou": 0.1760083458669548,
+      "exact_union_iou": 0.14244779346576264,
+      "set_f1_optimal_0_3": 0.4166666666666667,
+      "set_f1_optimal_0_5": 0.0
+    },
+    "Lung Opacity": {
+      "n": 85,
+      "coverage_iou": 0.35820517963740545,
+      "exact_union_iou": 0.3521241351581179,
+      "set_f1_optimal_0_3": 0.5415686274509804,
+      "set_f1_optimal_0_5": 0.24941176470588242
+    },
+    "Pleural Effusion": {
+      "n": 41,
+      "coverage_iou": 0.39787979057491873,
+      "exact_union_iou": 0.3689244128124611,
+      "set_f1_optimal_0_3": 0.6991869918699186,
+      "set_f1_optimal_0_5": 0.21138211382113817
+    },
+    "Pneumothorax": {
+      "n": 4,
+      "coverage_iou": 0.40831329614119016,
+      "exact_union_iou": 0.4212485427909021,
+      "set_f1_optimal_0_3": 0.5888888888888889,
+      "set_f1_optimal_0_5": 0.38888888888888884
+    }
+  },
+  "per_reference_count": {
+    "multi (2+ boxes)": {
+      "n": 43,
+      "coverage_iou": 0.3755373712392185,
+      "exact_union_iou": 0.3879470598275477,
+      "set_f1_optimal_0_3": 0.6622739018087855,
+      "set_f1_optimal_0_5": 0.27338501291989664
+    },
+    "single (1 box)": {
+      "n": 235,
+      "coverage_iou": 0.4221687683423843,
+      "exact_union_iou": 0.4095997820866803,
+      "set_f1_optimal_0_3": 0.6114420803782507,
+      "set_f1_optimal_0_5": 0.41843971631205673
+    }
+  },
+  "annotation_rows": 325,
+  "note": "sealed MS-CXR-1444 MedGrounder checkpoints applied without retraining; MedGrounder loader (640 letterbox), threshold 0.8, WBF 0.1; scored with the common evaluator in pixel space"
+}
