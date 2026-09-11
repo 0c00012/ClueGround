@@ -26,10 +26,8 @@ The historical 1444 result is reproducible from the archived local artifact chai
 - Component ablation (Table 2): `component` rows of `results/ablations/reranker_component_query_888.csv` and `results/ablations/reranker_component_query_1444.csv`; the "no re-ranker" row is the `Ours YOLO-RAD-DINO hybrid-v4` row of the controlled tables
 - RAD-DINO query ablation (Tables 3 and 4): `query` rows of the same two files
 - End-to-end context comparison (Table 5): `results/ablations/context_aggregate.csv` (unchanged)
-- Paired differences vs MedGrounder (Supplementary Table S4): `results/comparison/paired_difference_ci_1444.csv`
-- Re-ranker robustness (Supplementary Table S5): `results/robustness/*.csv`
-- Per-finding and per-reference-count breakdown (Supplementary Tables S6 and S7): `results/per_finding/*.csv`, regrouped from the sealed row-level scoring by `scripts/compile_reranker_per_finding_v1.py` (no new inference)
-- Direct-888 paired comparisons vs MedRPG / TransVG (text): `results/comparison/paired_difference_ci_888.csv`
-- External zero-shot evaluation on PadChest-GR (Supplementary Tables S8 and S9): `results/external/` (`PADCHEST_NUMBERS.json` is the transcription source; protocol counts in `padchest_gr_*_PROTOCOL_SUMMARY.json`; runners `scripts/build_padchest_gr_protocol_v1.py`, `scripts/run_clueground_padchest_gr_zero_shot_v1.py`)
+- Results by finding category and by number of reference regions (Supplementary Tables S4 and S5): `results/per_finding/*.csv`, regrouped from the sealed row-level scoring by `scripts/compile_reranker_per_finding_v1.py` (no new inference)
+- External zero-shot evaluation on PadChest-GR (main-text Table 6; label mapping in Supplementary Table S6, results by finding in Supplementary Table S7): `results/external/` (`PADCHEST_NUMBERS.json` is the transcription source; protocol counts in `padchest_gr_*_PROTOCOL_SUMMARY.json`; runners `scripts/build_padchest_gr_protocol_v1.py`, `scripts/run_clueground_padchest_gr_zero_shot_v1.py`, `scripts/run_medgrounder_padchest_zero_shot_v1.py`)
+- Not reported in the manuscript but kept as records: paired patient-cluster bootstrap comparisons (`results/comparison/`), re-ranker robustness configurations and the out-of-fold training-proposal run (`results/robustness/`)
 
 The current submitted PDF was checked separately from the older handoff PDF. Their SHA-256 values differ, so the current PDF, not the handoff copy, is the manuscript source of truth for table numbering and wording.
