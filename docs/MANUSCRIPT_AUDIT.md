@@ -39,7 +39,7 @@ The MS-CXR dataset (version 1.1.0) analyzed in this study is available through P
 
 **Code availability**
 
-The source code, evaluation scripts, aggregate results, and reproducibility documentation supporting this study are available at https://github.com/kimsi1854/ClueGround. The MS-CXR and MIMIC-CXR data are not redistributed and must be obtained independently through PhysioNet under credentialed access and the applicable data use agreement.
+The source code, evaluation scripts, aggregate results, and reproducibility documentation supporting this study are available at https://github.com/0c00012/ClueGround. The MS-CXR and MIMIC-CXR data are not redistributed and must be obtained independently through PhysioNet under credentialed access and the applicable data use agreement.
 
 ## Submission caveat
 

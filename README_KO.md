@@ -1,6 +1,6 @@
 # ClueGround
 
-이 저장소는 **Context-Guided YOLO-RAD-DINO Fusion for Single- and Multi-Region Chest X-Ray Phrase Grounding** 논문의 연구 코드와 비식별 집계 결과를 공개하기 위한 배포본입니다.
+이 저장소는 **ClueGround: Context-Guided YOLO-RAD-DINO Fusion for Multi-Region Chest X-Ray Phrase Grounding** 논문의 연구 코드와 비식별 집계 결과를 공개하기 위한 배포본입니다.
 
 ClueGround는 finding-conditioned YOLO 네 개의 후보, frozen RAD-DINO, phrase-conditioned localization head, 학습 split에서 훈련한 학습형 후보 re-ranker, validation 기반 후보 결합, rule-context 다중 박스 decoder를 사용합니다.
 
@@ -13,6 +13,8 @@ ClueGround는 finding-conditioned YOLO 네 개의 후보, frozen RAD-DINO, phras
 | MS-CXR-1444, 220 phrase groups / 280 boxes | Coverage IoU | 0.5419 +/- 0.0034 |
 | MS-CXR-1444 | Exact union IoU | 0.5433 +/- 0.0050 |
 | MS-CXR-1444 | SetF1@0.3 / SetF1@0.5 | 0.7873 / 0.6246 |
+| PadChest-GR test split, zero-shot (strict 매핑, 194문장) | Coverage IoU | 0.5356 +/- 0.0056 |
+| PadChest-GR test split, zero-shot (strict 매핑) | Exact union IoU / SetF1@0.5 | 0.5385 / 0.6380 |
 
 두 결과 모두 canonical split(direct-888: 638/87/163 phrase, MS-CXR-1444: 813/124/220 phrase group)에서 학습되는 모든 구성 요소를 seeds 13/42/2026으로 독립 실행한 평균입니다. ClueGround는 세 seed 모두에서 로컬 재학습 MedGrounder보다 Coverage IoU, Exact Union IoU, SetF1@0.5가 높지만, seed별 paired 95% patient-cluster bootstrap 구간은 0을 포함하고 SetF1@0.3은 MedGrounder가 더 높습니다. MS-CXR-888에서는 MedRPG와 TransVG가 여전히 더 높습니다. 자세한 내용은 [알려진 제한](docs/KNOWN_LIMITATIONS.md), [결과 계보](docs/PAPER_RESULT_LINEAGE.md), `results/comparison/`을 보십시오.
 

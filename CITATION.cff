@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite the associated manuscript."
-title: "ClueGround: Context-Guided YOLO-RAD-DINO Fusion"
+title: "ClueGround: Context-Guided YOLO-RAD-DINO Fusion for Multi-Region Chest X-Ray Phrase Grounding"
 type: software
 authors:
   - family-names: Kim
@@ -9,5 +9,21 @@ authors:
     given-names: Yoojoong
 version: 1.0.0
 date-released: 2026-09-07
-repository-code: "https://github.com/kimsi1854/ClueGround"
+repository-code: "https://github.com/0c00012/ClueGround"
 license: MIT
+preferred-citation:
+  type: article
+  title: "ClueGround: Context-Guided YOLO-RAD-DINO Fusion for Multi-Region Chest X-Ray Phrase Grounding"
+  authors:
+    - family-names: Kim
+      given-names: Siyoung
+    - family-names: Chung
+      given-names: Myung Jin
+    - family-names: Kim
+      given-names: Grace Hyun J.
+    - family-names: Yoo
+      given-names: Hakje
+    - family-names: Kim
+      given-names: Yoojoong
+  year: 2026
+  notes: "Manuscript submitted to Scientific Reports."

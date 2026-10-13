@@ -1,6 +1,6 @@
 # ClueGround
 
-Research code and aggregate evaluation artifacts for **Context-Guided YOLO-RAD-DINO Fusion for Single- and Multi-Region Chest X-Ray Phrase Grounding**.
+Research code and aggregate evaluation artifacts for **ClueGround: Context-Guided YOLO-RAD-DINO Fusion for Multi-Region Chest X-Ray Phrase Grounding**.
 
 ClueGround combines four finding-conditioned YOLO proposal generators with a frozen RAD-DINO encoder, a lightweight phrase-conditioned localization head, a learned candidate re-ranker trained on the training split, validation-calibrated candidate fusion, and a deterministic context-guided decoder that can return one or more boxes.
 
@@ -13,8 +13,10 @@ ClueGround combines four finding-conditioned YOLO proposal generators with a fro
 | MS-CXR-1444, 220 phrase groups / 280 boxes | Coverage IoU | 0.5419 +/- 0.0034 |
 | MS-CXR-1444 | Exact union IoU | 0.5433 +/- 0.0050 |
 | MS-CXR-1444 | SetF1@0.3 / SetF1@0.5 | 0.7873 / 0.6246 |
+| PadChest-GR test split, zero-shot (strict mapping, 194 sentences) | Coverage IoU | 0.5356 +/- 0.0056 |
+| PadChest-GR test split, zero-shot (strict mapping) | Exact union IoU / SetF1@0.5 | 0.5385 / 0.6380 |
 
-Both results are independent three-seed runs (13, 42, 2026) of every trained component on the canonical splits (direct-888: 638/87/163 phrases; MS-CXR-1444: 813/124/220 phrase groups). ClueGround exceeds the locally retrained MedGrounder on Coverage IoU, Exact Union IoU and SetF1@0.5 for every seed, but the seed-wise paired 95% patient-cluster bootstrap intervals include zero and MedGrounder remains higher on SetF1@0.3; MedRPG and TransVG remain higher on MS-CXR-888. See [Known limitations](docs/KNOWN_LIMITATIONS.md), [result lineage](docs/PAPER_RESULT_LINEAGE.md), and `results/comparison/`.
+Both results are independent three-seed runs (13, 42, 2026) of every trained component on the canonical splits (direct-888: 638/87/163 phrases; MS-CXR-1444: 813/124/220 phrase groups). ClueGround exceeds the locally retrained MedGrounder on Coverage IoU, Exact Union IoU and SetF1@0.5 for every seed, but the seed-wise paired 95% patient-cluster bootstrap intervals include zero and MedGrounder remains higher on SetF1@0.3; MedRPG and TransVG remain higher on MS-CXR-888. The PadChest-GR rows are the external zero-shot evaluation of the MS-CXR-1444 models (no fine-tuning; `results/external/`). See [Known limitations](docs/KNOWN_LIMITATIONS.md), [result lineage](docs/PAPER_RESULT_LINEAGE.md), and `results/comparison/`.
 
 The submitted manuscript's values (888 mean IoU 0.5486 +/- 0.0107; 1444 Coverage 0.5373 +/- 0.0035 on the historical 814/125 split with a fixed legacy candidate table) are retained under `results/main/` for the record and are superseded.
 
